@@ -96,7 +96,19 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	// YOUR CODE HERE
 	//
 	// FIXME: Add ray-trimesh intersection
+	glm::dvec3 a_coords = parent->vertices[a];
+	glm::dvec3 b_coords = parent->vertices[b];
+	glm::dvec3 c_coords = parent->vertices[c];
 
+	glm::dvec3 vab = (b_coords - a_coords);
+	glm::dvec3 vac = (c_coords - a_coords);
+	glm::dmat3x3 dvecCross = glm::cross(r.getDirection(), vac);
+	double det = vab.dot(vab, dvecCross);
+
+	if(det < 0) return false;
+	if(fabs(det) < 0) return false;
+	
+	
 	return false;
 }
 
