@@ -96,16 +96,16 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	// YOUR CODE HERE
 	//
 	// FIXME: Add ray-trimesh intersection
-	glm::dvec3 a_coords = parent->vertices[a];
-	glm::dvec3 b_coords = parent->vertices[b];
-	glm::dvec3 c_coords = parent->vertices[c];
+	glm::dvec3 a_coords = parent->vertices[ids[0]];
+	glm::dvec3 b_coords = parent->vertices[ids[1]];
+	glm::dvec3 c_coords = parent->vertices[ids[2]];
 
-	glm::dvec3 normal = this.getNormal();
+	glm::dvec3 normal = this->normal;
 	glm::dvec3 origin = r.getPosition();
 	glm::dvec3 direction = r.getDirection();
-	double distance = ((a_coords - origin).dot(normal)) / (direction.dot(normal));
+	double distance = (glm::dot((a_coords - origin),(normal)) / glm::dot((direction),(normal)));
 
-	glm::dvec3 p_coords = origin + distance.dot(direction);
+	glm::dvec3 p_coords = origin + distance*direction;
 
 	glm::dvec3 vab = (b_coords - a_coords);
 	glm::dvec3 vca = (a_coords - c_coords);
@@ -114,20 +114,20 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	glm::dvec3 vcp = (p_coords - c_coords);
 	glm::dvec3 vbp = (p_coords - b_coords);
 
-	glm::dvec3 a_cross = vab.cross(vap);
-	glm::dvec3 b_cross = vbc.cross(vbp);
-	glm::dvec3 c_cross = vca.cross(vcp);
-	glm::dvec3 whole_cross = vab.cross(-(vca));
+	glm::dvec3 a_cross = glm::cross(vab,vap);
+	glm::dvec3 b_cross = glm::cross(vbc,vbp);
+	glm::dvec3 c_cross = glm::cross(vca,vcp);
+	glm::dvec3 whole_cross = glm::cross(vab,-(vca));
 
 
-	double a_const = (a_cross).dot(normal);
-	double b_const = (b_cross).dot(normal);
-	double c_const = (c_cross).dot(normal);
+	double a_const = glm::dot((a_cross),normal);
+	double b_const = glm::dot((b_cross),normal);
+	double c_const = glm::dot((c_cross),normal);
 
-	double a_area = sqrt(a_cross.dot(a_cross));
-	double b_area = sqrt(b_cross.dot(b_cross)); 
-	double c_area = sqrt(c_cross.dot(c_cross)); 
-	double whole_area = sqrt(whole_cross.dot(whole_cross));
+	double a_area = sqrt(glm::dot(a_cross,a_cross));
+	double b_area = sqrt(glm::dot(b_cross,b_cross)); 
+	double c_area = sqrt(glm::dot(c_cross,c_cross)); 
+	double whole_area = sqrt(glm::dot(whole_cross,whole_cross));
 
 	if(a_const >= 0 && b_const >= 0 && c_const >= 0){
 		i.setT(distance);
