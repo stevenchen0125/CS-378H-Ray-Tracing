@@ -147,11 +147,12 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	if(a_const >= 0 && b_const >= 0 && c_const >= 0){
 		glm::dvec3 lin_interpolate = (w * a_normal + u * b_normal + v * c_normal);
 		//cout << sqrt(glm::dot(lin_interpolate, lin_interpolate)) << endl;
-		glm::dvec3 renormalized_interpolate = lin_interpolate / sqrt(glm::dot(lin_interpolate, lin_interpolate));
+		glm::dvec3 renormalized_interpolate = glm::normalize(lin_interpolate);
 		i.setT(distance);
 		i.setBary(u, v, w);
 		i.setN(renormalized_interpolate);
 		i.setMaterial(*(this->material));
+		i.setP(p_coords);
 		//cout << true << endl;
 		return true;
 	}
