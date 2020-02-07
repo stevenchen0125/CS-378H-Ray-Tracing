@@ -19,6 +19,7 @@ glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r, const glm::dvec3& p
 {
 	// YOUR CODE HERE:
 	// You should implement shadow-handling code here.
+
 	return glm::dvec3(1.0, 1.0, 1.0);
 }
 
@@ -36,7 +37,7 @@ double PointLight::distanceAttenuation(const glm::dvec3& P) const
 {
 
 	// YOUR CODE HERE
-
+	
 	// You'll need to modify this method to attenuate the intensity 
 	// of the light based on the distance between the source and the 
 	// point P.  For now, we assume no attenuation and just return 1.0

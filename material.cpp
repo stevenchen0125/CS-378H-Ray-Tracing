@@ -50,7 +50,7 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 		 
 		glm::dvec3 kD = kd(i);
 		glm::dvec3 kS = ks(i);
-		glm::dvec3 iIn = pLight.get()->getDirection(i.getP());
+		glm::dvec3 iIn = pLight.get()->getColor();
 		glm::dvec3 v = glm::normalize(-(r.getDirection()));
 		glm::dvec3 n = glm::normalize(i.getN());
 		glm::dvec3 l = glm::normalize(-(pLight.get()->getDirection(i.getP())));
