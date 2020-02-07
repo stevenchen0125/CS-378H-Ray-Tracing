@@ -102,6 +102,10 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	glm::dvec3 b_coords = parent->vertices[ids[1]];
 	glm::dvec3 c_coords = parent->vertices[ids[2]];
 
+	glm::dvec3 a_normal = parent->normals[ids[0]];
+	glm::dvec3 b_normal = parent->normals[ids[1]];
+	glm::dvec3 c_normal = parent->normals[ids[2]];
+
 	glm::dvec3 normal = this->normal;
 	glm::dvec3 origin = r.getPosition();
 	glm::dvec3 direction = r.getDirection();
@@ -134,11 +138,19 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	double c_area = sqrt(glm::dot(c_cross,c_cross)); 
 	double whole_area = sqrt(glm::dot(whole_cross,whole_cross));
 
+	double u = c_area / whole_area;
+	double v = a_area / whole_area;
+	double w = b_area / whole_area;
+
+	//cout << 123 << endl;
 	if(a_const >= 0 && b_const >= 0 && c_const >= 0){
+		glm::dvec3 lin_interpolate = (w * a_normal + u * b_normal + v * c_normal);
+		cout << sqrt(glm::dot(lin_interpolate, lin_interpolate)) << endl;
+		glm::dvec3 renormalized_interpolate = lin_interpolate / sqrt(glm::dot(lin_interpolate, lin_interpolate));
 		i.setT(distance);
-		i.setBary(c_area / whole_area, a_area / whole_area, b_area / whole_area);
-		i.setN(normal);
-		i.setMaterial(*(this->materials));
+		i.setBary(u, v, w);
+		i.setN(renormalized_interpolate);
+		i.setMaterial(*(this->material));
 		//cout << true << endl;
 		return true;
 	}
