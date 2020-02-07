@@ -70,6 +70,7 @@ const char* Trimesh::doubleCheck()
 bool Trimesh::intersectLocal(ray& r, isect& i) const
 {
 	bool have_one = false;
+	//generateNormals();
 	for (auto face : faces) {
 		isect cur;
 		if (face->intersectLocal(r, cur)) {
@@ -145,7 +146,7 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	//cout << 123 << endl;
 	if(a_const >= 0 && b_const >= 0 && c_const >= 0){
 		glm::dvec3 lin_interpolate = (w * a_normal + u * b_normal + v * c_normal);
-		cout << sqrt(glm::dot(lin_interpolate, lin_interpolate)) << endl;
+		//cout << sqrt(glm::dot(lin_interpolate, lin_interpolate)) << endl;
 		glm::dvec3 renormalized_interpolate = lin_interpolate / sqrt(glm::dot(lin_interpolate, lin_interpolate));
 		i.setT(distance);
 		i.setBary(u, v, w);
