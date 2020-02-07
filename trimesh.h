@@ -87,6 +87,7 @@ class TrimeshFace : public MaterialSceneObject {
 	int ids[3];
 	glm::dvec3 normal;
 	double dist;
+	Material *materials;
 
 public:
 	TrimeshFace(Scene *scene, Material *mat, Trimesh *parent, int a, int b,
@@ -97,6 +98,7 @@ public:
 		ids[0]       = a;
 		ids[1]       = b;
 		ids[2]       = c;
+		materials = mat;
 
 		// Compute the face normal here, not on the fly
 		glm::dvec3 a_coords = parent->vertices[a];
