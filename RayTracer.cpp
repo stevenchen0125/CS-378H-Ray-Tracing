@@ -76,7 +76,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth, doub
 #if VERBOSE
 	std::cerr << "== current depth: " << depth << std::endl;
 #endif
-
+	//std::cout << "tracRay " << std::endl;
 	if(scene->intersect(r, i)) {
 		// YOUR CODE HERE
 
@@ -88,9 +88,13 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth, doub
 		// Instead of just returning the result of shade(), add some
 		// more steps: add in the contributions from reflected and refracted
 		// rays.
-
+		//std::cout << "tracRay in if" << std::endl;
 		const Material& m = i.getMaterial();
+		//std::cout << "getmaterial" << std::endl;
 		colorC = m.shade(scene.get(), r, i);
+
+
+
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
@@ -223,6 +227,12 @@ void RayTracer::traceImage(int w, int h)
 	//
 	//       An asynchronous traceImage lets the GUI update your results
 	//       while rendering.
+	for (int i = 0; i < w; i++) {
+		for (int j = 0; j < h; j++) {
+			glm::dvec3 pixel = RayTracer::tracePixel(i, j);
+			setPixel(i, j, pixel);
+		}
+	}
 }
 
 int RayTracer::aaImage()

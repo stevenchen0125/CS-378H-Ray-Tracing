@@ -4,6 +4,7 @@
 #include <string.h>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include "../ui/TraceUI.h"
 extern TraceUI* traceUI;
 
@@ -96,6 +97,7 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	// YOUR CODE HERE
 	//
 	// FIXME: Add ray-trimesh intersection
+	//cout << "before distance" << endl;
 	glm::dvec3 a_coords = parent->vertices[ids[0]];
 	glm::dvec3 b_coords = parent->vertices[ids[1]];
 	glm::dvec3 c_coords = parent->vertices[ids[2]];
@@ -103,7 +105,10 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	glm::dvec3 normal = this->normal;
 	glm::dvec3 origin = r.getPosition();
 	glm::dvec3 direction = r.getDirection();
+	
 	double distance = (glm::dot((a_coords - origin),(normal)) / glm::dot((direction),(normal)));
+	//cout << "distance: " << distance << endl;
+	if (distance <= 0) return false;
 
 	glm::dvec3 p_coords = origin + distance*direction;
 
@@ -133,9 +138,11 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 		i.setT(distance);
 		i.setBary(c_area / whole_area, a_area / whole_area, b_area / whole_area);
 		i.setN(normal);
+		i.setMaterial(*(this->materials));
+		//cout << true << endl;
 		return true;
 	}
-	
+	//cout << false << endl;
 	return false;
 }
 
