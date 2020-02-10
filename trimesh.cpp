@@ -116,6 +116,7 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 	if (distance <= 0) return false;
 
 	glm::dvec3 p_coords = origin + distance*direction;
+	
 
 	glm::dvec3 vab = (b_coords - a_coords);
 	glm::dvec3 vca = (a_coords - c_coords);
@@ -152,7 +153,9 @@ bool TrimeshFace::intersectLocal(ray& r, isect& i) const
 		i.setBary(u, v, w);
 		i.setN(renormalized_interpolate);
 		i.setMaterial(*(this->material));
-		i.setP(p_coords);
+		r.setIntersect(p_coords);
+		// glm::dvec3 p = i.getP();
+		// std::cout<< p[0] << " " << p[1] << " " << p[2] << std::endl;
 		//cout << true << endl;
 		return true;
 	}

@@ -43,6 +43,9 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 	glm::dvec3 iScene = scene->ambient();
 	glm::dvec3 *iA = new glm::dvec3(kA[0] * iScene[0], kA[1] * iScene[1], kA[2] * iScene[2]);
 	glm::dvec3 *result = iA;
+	glm::dvec3 p = (r.getPosition() + i.getT() * r.getDirection()) + RAY_EPSILON*i.getN();
+	// std::cout<< p[0] << " " << p[1] << " " << p[2] << std::endl;
+	
 
 	for ( const auto& pLight : scene->getAllLights() )
 	{
@@ -51,9 +54,18 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 		glm::dvec3 kD = kd(i);
 		glm::dvec3 kS = ks(i);
 		glm::dvec3 iIn = pLight.get()->getColor();
+		
 		glm::dvec3 v = glm::normalize(-(r.getDirection()));
 		glm::dvec3 n = glm::normalize(i.getN());
 		glm::dvec3 l = glm::normalize(-(pLight.get()->getDirection(i.getP())));
+		
+		double lightAttenuation = pLight.get()->distanceAttenuation(p);
+		iIn *= lightAttenuation;
+		// std::cout << lightAttenuation << std::endl;
+		glm::dvec3 shadowAttenuation = pLight.get()->shadowAttenuation(r, p);
+		// std::cout << shadowAttenuation[0] << " " << shadowAttenuation[1] << " " << shadowAttenuation[2] << std::endl;
+		iIn *= shadowAttenuation;
+
 		glm::dvec3 ref = glm::normalize((l) - 2.0 * -(glm::dot((l), n)) * n);
 		double defuse_max = glm::max(-(glm::dot(l, n)), 0.0);
 		glm::dvec3 kD_max = defuse_max * kD;
@@ -62,8 +74,10 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 		glm::dvec3 kD_kS = kD_max + kS_max;
 		glm::dvec3 *kD_kS_iIn = new glm::dvec3(kD_kS[0] * iIn[0], kD_kS[1] * iIn[1], kD_kS[2] * iIn[2]);
 		*result += *kD_kS_iIn;
+		// glm::dvec3 shadowAttenuation = pLight.get()->shadowAttenuation(r, i.getP());
+		// *result *= shadowAttenuation;
 	}
-
+	
 	return *result;
 }
 

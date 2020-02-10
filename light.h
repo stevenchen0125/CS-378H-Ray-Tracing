@@ -22,8 +22,8 @@ public:
 
 
 protected:
-	Light(Scene *scene, const glm::dvec3& col) : SceneElement(scene), color(col) {}
-
+	Light(Scene *scene, const glm::dvec3& col) : SceneElement(scene), color(col), thisscene(scene) {}
+	Scene* thisscene;
 	glm::dvec3 color;
 
 public:
