@@ -179,7 +179,7 @@ public:
         : _ke( e ), _ka( a ), _ks( s ), _kd( d ), _kr( r ), _kt( t ), 
           _shininess( glm::dvec3(sh,sh,sh) ), _index( glm::dvec3(in,in,in) ) { setBools(); }
 
-    virtual glm::dvec3 shade( Scene *scene, const ray& r, const isect& i ) const;
+    virtual glm::dvec3 shade( Scene *scene, const ray& r, const isect& i , int depth) const;
 
 
     

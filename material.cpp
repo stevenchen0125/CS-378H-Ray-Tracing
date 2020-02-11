@@ -17,7 +17,7 @@ Material::~Material()
 
 // Apply the phong model to this point on the surface of the object, returning
 // the color of that point.
-glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
+glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i, int depth) const
 {
 	// YOUR CODE HERE
 
@@ -44,8 +44,10 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 	glm::dvec3 *iA = new glm::dvec3(kA[0] * iScene[0], kA[1] * iScene[1], kA[2] * iScene[2]);
 	glm::dvec3 *result = iA;
 	glm::dvec3 p = (r.getPosition() + i.getT() * r.getDirection()) + RAY_EPSILON*i.getN();
-	// std::cout<< p[0] << " " << p[1] << " " << p[2] << std::endl;
+	bool shadow = false;
+	glm::dvec3 n = glm::normalize(i.getN());
 	
+	// std::cout<< p[0] << " " << p[1] << " " << p[2] << std::endl;
 
 	for ( const auto& pLight : scene->getAllLights() )
 	{
@@ -56,28 +58,51 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i) const
 		glm::dvec3 iIn = pLight.get()->getColor();
 		
 		glm::dvec3 v = glm::normalize(-(r.getDirection()));
-		glm::dvec3 n = glm::normalize(i.getN());
+		
 		glm::dvec3 l = glm::normalize(-(pLight.get()->getDirection(i.getP())));
 		
 		double lightAttenuation = pLight.get()->distanceAttenuation(p);
 		iIn *= lightAttenuation;
 		// std::cout << lightAttenuation << std::endl;
 		glm::dvec3 shadowAttenuation = pLight.get()->shadowAttenuation(r, p);
+		// if (glm::dot(shadowAttenuation, shadowAttenuation) == 0) shadow = true;
 		// std::cout << shadowAttenuation[0] << " " << shadowAttenuation[1] << " " << shadowAttenuation[2] << std::endl;
 		iIn *= shadowAttenuation;
-
-		glm::dvec3 ref = glm::normalize((l) - 2.0 * -(glm::dot((l), n)) * n);
+		glm::dvec3 ref = glm::normalize(((l) - 2.0 * (glm::dot((l), n)) * n));
 		double defuse_max = glm::max(-(glm::dot(l, n)), 0.0);
 		glm::dvec3 kD_max = defuse_max * kD;
-		double specular_max = pow(glm::max(glm::dot(v, ref), 0.0), shininess(i));
+
+		double specularDot = glm::dot(v, ref);
+		double specular_max = pow(glm::max(specularDot, 0.0), shininess(i));
+		// std::cout << specularDot << " " << specular_max << std::endl;
 		glm::dvec3 kS_max = specular_max * kS;
 		glm::dvec3 kD_kS = kD_max + kS_max;
+		// std::cout << Refl() << std::endl;
+		// if (Refl()) {
+		// 	glm::dvec3 kR = kr(i);
+		// 	glm::dvec3 kR_max = specular_max * kR;
+		// 	*result += kR_max * iIn;
+		// }
+		
 		glm::dvec3 *kD_kS_iIn = new glm::dvec3(kD_kS[0] * iIn[0], kD_kS[1] * iIn[1], kD_kS[2] * iIn[2]);
 		*result += *kD_kS_iIn;
+		
 		// glm::dvec3 shadowAttenuation = pLight.get()->shadowAttenuation(r, i.getP());
 		// *result *= shadowAttenuation;
 	}
-	
+	// if (depth >= 0) {
+	// 	// std::cout << ks(i)[0] << " " << ks(i)[1] << " " << ks(i)[2] << std::endl;
+	// 	if (Refl() || Trans() || Recur() || Spec() || Both()) {
+	// 		glm::dvec3 camVector = glm::normalize(r.getDirection());
+	// 		glm::dvec3 ref = glm::normalize((camVector) - 2.0 * -(glm::dot((camVector), n)) * n);;
+	// 		isect iReflect;
+	// 		ray rayReflect(p, ref, glm::dvec3(1,1,1), ray::REFLECTION);
+	// 		if(scene->intersect(rayReflect, iReflect)) {
+	// 			*result += kr(iReflect) * shade(scene, rayReflect, iReflect, depth-1);
+	// 		}
+	// 	}
+	// }
+	*result += ke(i);
 	return *result;
 }
 

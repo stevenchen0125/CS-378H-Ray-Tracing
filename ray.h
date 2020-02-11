@@ -43,15 +43,18 @@ public:
 	glm::dvec3 getPosition() const { return p; }
 	glm::dvec3 getDirection() const { return d; }
 	glm::dvec3 getAtten() const { return atten; }
+	glm::dvec3 getIntersect() const { return i; }
 	RayType type() const { return t; }
 
 	void setPosition(const glm::dvec3& pp) { p = pp; }
 	void setDirection(const glm::dvec3& dd) { d = dd; }
+	void setIntersect(const glm::dvec3& ii) { i = ii; }
 
 private:
 	glm::dvec3 p;
 	glm::dvec3 d;
 	glm::dvec3 atten;
+	glm::dvec3 i;
 	RayType t;
 };
 

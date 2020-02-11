@@ -97,9 +97,7 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r, const glm::dvec3& p) cons
 	if(thisscene->intersect(lightRay, i)) {
 		
 		double it = i.getT();
-		if (it > RAY_EPSILON) {
 			return glm::dvec3(0,0,0);
-		}
 		
 		// std::cout << p_distance << " " << ip_distance << std::endl;
 		

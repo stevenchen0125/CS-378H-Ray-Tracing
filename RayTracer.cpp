@@ -91,18 +91,20 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth, doub
 		//std::cout << "tracRay in if" << std::endl;
 		const Material& m = i.getMaterial();
 		//std::cout << "getmaterial" << std::endl;
-		colorC = m.shade(scene.get(), r, i);
+		colorC = m.shade(scene.get(), r, i, depth);
 
-		if(depth > 0) {
-			glm::dvec3 kR = m.kr(i);
-			if(kR > 0) {
-				glm::dvec3 newColor = kR * colorC;
-				glm::dvec3 ref = glm::normalize((r) - 2.0 * -(glm::dot((r), n)) * n);
-				glm::dvec3 p = r.getPosition() + i.getT() * r.getDirection() + RAY_EPSILON * i.getN();
-				ray reflect = ray(p, ref, kR, ray::REFLECTION);
-				traceRay(r, glm::dvec3(1, 1, 1), depth - 1, 1);
-			}
-		}
+		// if(depth > 0) {
+		// 	glm::dvec3 kR = m.kr(i);
+		// 	if(glm::dot(kR, kR) > 0) {
+		// 		glm::dvec3 newColor = kR * colorC;
+		// 		glm::dvec3 n = i.getN();
+		// 		glm::dvec3 direction = r.getDirection();
+		// 		glm::dvec3 p = r.getPosition() + i.getT() * direction + RAY_EPSILON * n;
+		// 		glm::dvec3 reflection = glm::normalize((direction) - 2.0 * -(glm::dot((direction), n)) * n);
+		// 		ray reflect = ray(p, reflection, kR, ray::REFLECTION);
+		// 		colorC += traceRay(r, glm::dvec3(1, 1, 1), depth - 1, t);
+		// 	}
+		// }
 
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
