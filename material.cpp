@@ -17,7 +17,7 @@ Material::~Material()
 
 // Apply the phong model to this point on the surface of the object, returning
 // the color of that point.
-glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i, int depth) const
+glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i, int depth, double index1) const
 {
 	// YOUR CODE HERE
 
@@ -38,14 +38,16 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i, int depth
 	// you'll want to use code that looks something
 	// like this:
 	//
+	
+	
 
 	glm::dvec3 kA = ka(i);
 	glm::dvec3 iScene = scene->ambient();
-	glm::dvec3 *iA = new glm::dvec3(kA[0] * iScene[0], kA[1] * iScene[1], kA[2] * iScene[2]);
-	glm::dvec3 *result = iA;
-	glm::dvec3 p = (r.getPosition() + i.getT() * r.getDirection()) + RAY_EPSILON*i.getN();
-	bool shadow = false;
+	glm::dvec3 result(kA*iScene);
+	glm::dvec3 p = (r.getPosition() + i.getT() * r.getDirection()) + i.getN() * RAY_EPSILON;
 	glm::dvec3 n = glm::normalize(i.getN());
+
+	// std::cout << "material " << i.getT() << std::endl;
 	
 	// std::cout<< p[0] << " " << p[1] << " " << p[2] << std::endl;
 
@@ -57,35 +59,40 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i, int depth
 		glm::dvec3 kS = ks(i);
 		glm::dvec3 iIn = pLight.get()->getColor();
 		
-		glm::dvec3 v = glm::normalize(-(r.getDirection()));
-		
-		glm::dvec3 l = glm::normalize(-(pLight.get()->getDirection(i.getP())));
-		
+		// LIGHT ATTENUATION
 		double lightAttenuation = pLight.get()->distanceAttenuation(p);
 		iIn *= lightAttenuation;
-		// std::cout << lightAttenuation << std::endl;
+		
+		// SHADOW ATTENUATION
 		glm::dvec3 shadowAttenuation = pLight.get()->shadowAttenuation(r, p);
-		// if (glm::dot(shadowAttenuation, shadowAttenuation) == 0) shadow = true;
-		// std::cout << shadowAttenuation[0] << " " << shadowAttenuation[1] << " " << shadowAttenuation[2] << std::endl;
 		iIn *= shadowAttenuation;
-		glm::dvec3 ref = glm::normalize(((l) - 2.0 * (glm::dot((l), n)) * n));
-		double defuse_max = glm::max(-(glm::dot(l, n)), 0.0);
-		glm::dvec3 kD_max = defuse_max * kD;
-
-		double specularDot = glm::dot(v, ref);
-		double specular_max = pow(glm::max(specularDot, 0.0), shininess(i));
-		// std::cout << specularDot << " " << specular_max << std::endl;
-		glm::dvec3 kS_max = specular_max * kS;
-		glm::dvec3 kD_kS = kD_max + kS_max;
+		
+		
 		// std::cout << Refl() << std::endl;
 		// if (Refl()) {
 		// 	glm::dvec3 kR = kr(i);
 		// 	glm::dvec3 kR_max = specular_max * kR;
 		// 	*result += kR_max * iIn;
-		// }
+		// } 267, 257
 		
-		glm::dvec3 *kD_kS_iIn = new glm::dvec3(kD_kS[0] * iIn[0], kD_kS[1] * iIn[1], kD_kS[2] * iIn[2]);
-		*result += *kD_kS_iIn;
+		glm::dvec3 v = glm::normalize(-(r.getDirection()));
+		glm::dvec3 l = glm::normalize(-(pLight->getDirection(p)));
+
+		glm::dvec3 ref = glm::normalize(l - n * glm::dot(n, l) * 2.0);
+		double defuse_max = glm::max(-glm::dot(l, n), 0.0);
+		glm::dvec3 kD_max = defuse_max * kD;
+
+		
+
+		double specularDot = glm::dot(v, ref);
+		double specular_max = pow(glm::max(specularDot, 0.0), shininess(i));
+		glm::dvec3 kS_max = specular_max * kS;
+
+		glm::dvec3 kS_kD = kS_max + kD_max;
+
+		
+		result += iIn * kS_kD;
+		// result += iIn;
 		
 		// glm::dvec3 shadowAttenuation = pLight.get()->shadowAttenuation(r, i.getP());
 		// *result *= shadowAttenuation;
@@ -102,8 +109,51 @@ glm::dvec3 Material::shade(Scene* scene, const ray& r, const isect& i, int depth
 	// 		}
 	// 	}
 	// }
-	*result += ke(i);
-	return *result;
+
+	if (Recur()) {
+		if (depth > 0) {
+			glm::dvec3 aoeu(0,0,0);
+			glm::dvec3 win = r.getDirection();
+			if (Refl()) {
+				
+				glm::dvec3 wref(glm::normalize(win - n * glm::dot(n, win) * 2.0));
+				ray reflRay(p, wref, glm::dvec3(0,0,0), ray::REFLECTION);
+				isect reflIsect;
+				if (scene->intersect (reflRay, reflIsect)) {
+					aoeu += kr(i) * shade(scene, reflRay, reflIsect, depth-1, index1);
+				}
+				// return aoeu;
+			}
+			if (Trans()) {
+				// std::cout << Trans() << std::endl;
+				double theta1 = glm::acos(glm::dot(win, i.getN()));
+				glm::dvec3 wref;
+				double index2 = index(i);
+				if (theta1 <= RAY_EPSILON || index1 == index2) {
+					wref = win;
+				} else {
+					double theta2 = index1/index2 * glm::sin(theta1);
+					if (theta2 > 1) {
+						wref = glm::normalize(win - n * glm::dot(n, win) * 2.0);
+					} else {
+						glm::dvec3 n2 = -i.getN();
+						wref = n2*glm::cos(theta2);
+					}
+				}
+				ray refrRay(p, wref, glm::dvec3(1,1,1), ray::REFRACTION);
+				isect refrIsect;
+				if (scene->intersect(refrRay, refrIsect)) {
+					aoeu += kt(i) * shade(scene, refrRay, refrIsect, depth-1, index2);
+				}
+
+			}
+			return aoeu;
+		
+		}
+	}
+	
+	result += ke(i);
+	return result;
 }
 
 TextureMap::TextureMap(string filename)

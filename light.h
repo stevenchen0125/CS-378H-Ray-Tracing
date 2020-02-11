@@ -67,6 +67,7 @@ public:
 	virtual double distanceAttenuation(const glm::dvec3& P) const;
 	virtual glm::dvec3 getColor() const;
 	virtual glm::dvec3 getDirection(const glm::dvec3& P) const;
+	virtual glm::dvec3 getPosition() const;
 
 	void setAttenuationConstants(float a, float b, float c)
 	{

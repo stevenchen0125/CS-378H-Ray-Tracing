@@ -79,7 +79,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth, doub
 	//std::cout << "tracRay " << std::endl;
 	if(scene->intersect(r, i)) {
 		// YOUR CODE HERE
-
+		// std:: cout << i.getT() << std::endl;
 		// An intersection occurred!  We've got work to do.  For now,
 		// this code gets the material for the surface that was intersected,
 		// and asks that material to provide a color for the ray.
@@ -91,7 +91,7 @@ glm::dvec3 RayTracer::traceRay(ray& r, const glm::dvec3& thresh, int depth, doub
 		//std::cout << "tracRay in if" << std::endl;
 		const Material& m = i.getMaterial();
 		//std::cout << "getmaterial" << std::endl;
-		colorC = m.shade(scene.get(), r, i, depth);
+		colorC = m.shade(scene.get(), r, i, depth, 1.0);
 
 		// if(depth > 0) {
 		// 	glm::dvec3 kR = m.kr(i);
@@ -255,6 +255,11 @@ int RayTracer::aaImage()
 	//
 	// TIP: samples and aaThresh have been synchronized with TraceUI by
 	//      RayTracer::traceSetup() function
+	// for (int i = 0; i < w; i++) {
+	// 	for (int j = 0; j < h; j++) {
+
+	// 	}
+	// }
 	return 0;
 }
 
