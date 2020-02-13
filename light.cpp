@@ -25,8 +25,54 @@ glm::dvec3 DirectionalLight::shadowAttenuation(const ray& r, const glm::dvec3& p
 	ray lightRay(p, l, glm::dvec3(1,1,1), ray::SHADOW);
 	// std::cout << p[0] << " " << p[1] << " " << p[2] << std::endl;
 	if(thisscene->intersect(lightRay, i)) {
-		return glm::dvec3(0,0,0);
+		if (!i.getMaterial().Trans()) {
+			return glm::dvec3(0,0,0);
+		}
 		
+		
+		
+		glm::dvec3 aoeu(0,0,0);
+		if(i.getMaterial().Trans()) {
+			// std::cout << "trans ";
+			// glm::dvec3 iNorm = i.getN();
+			glm::dvec3 kT = i.getMaterial().kt(i);
+			// glm::dvec3 kT= i.getMaterial().kt(i);
+			
+			double n1 = 0;
+			double t = i.getT();
+			glm::dvec3 p2 = p + t * l;
+			lightRay = ray(p2, l, glm::dvec3(1,1,1), ray::SHADOW);
+			i = isect();
+			
+			p2 = p2 + t * l;
+			lightRay = ray(p2, l, glm::dvec3(1,1,1), ray::SHADOW);
+			i = isect();
+			bool intersect = (scene->intersect(lightRay, i));
+			t = i.getT();
+			// while (t < RAY_EPSILON) {
+			// 	i = isect();
+			// 	p2 = p2 + t * l;
+			// 	lightRay = ray(p2, l, glm::dvec3(1,1,1), ray::SHADOW);
+			// 	i = isect();
+			// 	scene->intersect(lightRay, i);
+			// }
+			// std::cout << t << " " << std::endl;
+			aoeu += glm::dvec3(glm::pow(kT[0], t), glm::pow(kT[1], t), glm::pow(kT[2], t));
+			
+			// p2 = p2 + t * l;
+			// lightRay = ray(p2, l, glm::dvec3(1,1,1), ray::SHADOW);
+			// i = isect();
+			// bool intersect = (scene->intersect(lightRay, i));
+			// t = i.getT();
+			// while (t < RAY_EPSILON) {
+			// 	i = isect();
+			// 	p2 = p2 + t * l;
+			// 	lightRay = ray(p2, l, glm::dvec3(1,1,1), ray::SHADOW);
+			// 	i = isect();
+			// 	intersect = scene->intersect(lightRay, i);
+			// }
+			return aoeu;
+		}
 		// std::cout << p_distance << " " << ip_distance << std::endl;
 		
 	}
@@ -104,7 +150,7 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r, const glm::dvec3& p) cons
 		
 		
 		
-		glm::dvec3 aoeu(1,1,1);
+		glm::dvec3 aoeu(0,0,0);
 		if(i.getMaterial().Trans()) {
 			// std::cout << "trans ";
 			// glm::dvec3 iNorm = i.getN();
@@ -117,7 +163,6 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r, const glm::dvec3& p) cons
 			lightRay = ray(p2, l, glm::dvec3(1,1,1), ray::SHADOW);
 			i = isect();
 			
-			t = i.getT();
 			p2 = p2 + t * l;
 			lightRay = ray(p2, l, glm::dvec3(1,1,1), ray::SHADOW);
 			i = isect();
@@ -130,8 +175,8 @@ glm::dvec3 PointLight::shadowAttenuation(const ray& r, const glm::dvec3& p) cons
 			// 	i = isect();
 			// 	scene->intersect(lightRay, i);
 			// }
-			std::cout << t << " " << std::endl;
-			aoeu = glm::dvec3(glm::pow(kT[0], t), glm::pow(kT[1], t), glm::pow(kT[2], t));
+			// std::cout << t << " " << std::endl;
+			aoeu += glm::dvec3(glm::pow(kT[0], t), glm::pow(kT[1], t), glm::pow(kT[2], t));
 			
 			// p2 = p2 + t * l;
 			// lightRay = ray(p2, l, glm::dvec3(1,1,1), ray::SHADOW);
